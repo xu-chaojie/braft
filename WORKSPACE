@@ -55,8 +55,8 @@ new_http_archive(
 
 git_repository(
     name = "com_github_brpc_brpc",
-    remote= "https://github.com/apache/incubator-brpc.git",
-    tag = "v0.9.0",
+    remote= "https://github.com/xu-chaojie/incubator-brpc",
+    commit = "62418bf973b68227cf712659212df27f00763b35",
 )
 
 bind(

@@ -21,6 +21,7 @@
 #include <butil/macros.h>
 #include <butil/raw_pack.h>                     // butil::RawPacker
 #include <butil/file_util.h>
+#include <brpc/channel.h>
 #include "braft/raft.h"
 
 namespace bvar {
@@ -402,6 +403,26 @@ size_t FileSegData::next(uint64_t* offset, butil::IOBuf* data) {
     size_t body_len = _data.cutn(data, seg_len);
     CHECK_EQ(body_len, seg_len) << "seg_len: " << seg_len << " body_len: " << body_len;
     return seg_len;
+}
+
+DEFINE_bool(raft_use_ucp, false, "use ucp connection");
+
+int init_channel(brpc::Channel* channel,
+                 butil::EndPoint ep,
+                 const brpc::ChannelOptions* opts) {
+    if (!FLAGS_raft_use_ucp) {
+        BRAFT_VLOG << "init channel with ucp false, endpoint: " << ep;
+        return channel->Init(std::move(ep), opts);
+    }
+
+    BRAFT_VLOG << "init channel with ucp true, endpoint: " << ep;
+    brpc::ChannelOptions options =
+            opts != nullptr ? *opts : brpc::ChannelOptions{};
+
+    options.use_ucp = true;
+    ep.set_ucp();
+
+    return channel->Init(std::move(ep), &options);
 }
 
 }  //  namespace braft

@@ -44,6 +44,11 @@
 #include "braft/macros.h"
 #include "braft/raft.h"
 
+namespace brpc {
+class Channel;
+class ChannelOptions;
+}  // namespace brpc
+
 namespace bvar {
 namespace detail {
 
@@ -304,6 +309,12 @@ public:
 private:
     bthread::CountdownEvent _event;
 };
+
+// Init channel to an endpoint, and automaticlly set `use_ucp` if
+// |FLAGS_use_ucp| is true.
+int init_channel(brpc::Channel* channel,
+                 butil::EndPoint ep,
+                 const brpc::ChannelOptions* opts);
 
 }  //  namespace braft
 

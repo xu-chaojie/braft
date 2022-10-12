@@ -65,7 +65,11 @@ int RemoteFileCopier::init(const std::string& uri, FileSystemAdaptor* fs,
                    << " in " << uri;
         return -1;
     }
-    if (_channel.Init(ip_and_port.as_string().c_str(), NULL) != 0) {
+
+    butil::EndPoint ep;
+    CHECK(0 == butil::str2endpoint(ip_and_port.as_string().c_str(), &ep));
+
+    if (init_channel(&_channel, ep, NULL)) {
         LOG(ERROR) << "Fail to init Channel to " << ip_and_port;
         return -1;
     }

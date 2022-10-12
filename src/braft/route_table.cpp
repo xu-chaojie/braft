@@ -23,6 +23,7 @@
 #include <brpc/controller.h>
 #include <brpc/channel.h>
 #include "braft/cli.pb.h"
+#include "braft/util.h"
 
 namespace braft {
 namespace rtb {
@@ -174,7 +175,7 @@ butil::Status refresh_leader(const GroupId& group, int timeout_ms) {
     for (Configuration::const_iterator
             iter = conf.begin(); iter != conf.end(); ++iter) {
         brpc::Channel channel;
-        if (channel.Init(iter->addr, NULL) != 0) {
+        if (0 != init_channel(&channel, iter->addr, nullptr)) {
             if (error.ok()) {
                 error.set_error(-1, "Fail to init channel to %s",
                                     iter->to_string().c_str());
