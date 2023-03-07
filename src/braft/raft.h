@@ -438,6 +438,11 @@ struct NodeOptions {
     // Default: 1000 (1s)
     int election_timeout_ms; //follower to candidate timeout
 
+    // Channel connect timeout for pre_vote/vote/append_entry
+    //
+    // Default: 200 (200ms)
+    int connect_timeout_ms;
+
     // A snapshot saving would be triggered every |snapshot_interval_s| seconds
     // if this was reset as a positive number
     // If |snapshot_interval_s| <= 0, the time based snapshot would be disabled.
@@ -520,6 +525,7 @@ struct NodeOptions {
 
 inline NodeOptions::NodeOptions() 
     : election_timeout_ms(1000)
+    , connect_timeout_ms(200)
     , snapshot_interval_s(3600)
     , catchup_margin(1000)
     , fsm(NULL)

@@ -57,6 +57,7 @@ static bvar::CounterRecorder g_send_entries_batch_counter(
 
 ReplicatorOptions::ReplicatorOptions()
     : dynamic_heartbeat_timeout_ms(NULL)
+    , connect_timeout_ms(NULL)
     , log_manager(NULL)
     , ballot_box(NULL)
     , node(NULL)
@@ -105,7 +106,7 @@ int Replicator::start(const ReplicatorOptions& options, ReplicatorId *id) {
     }
     Replicator* r = new Replicator();
     brpc::ChannelOptions channel_opt;
-    //channel_opt.connect_timeout_ms = *options.heartbeat_timeout_ms;
+    channel_opt.connect_timeout_ms = *options.connect_timeout_ms;
     channel_opt.timeout_ms = -1; // We don't need RPC timeout
     if (init_channel(&r->_sending_channel, options.peer_id.addr, &channel_opt) != 0) {
         LOG(ERROR) << "Fail to init sending channel"
@@ -1323,6 +1324,7 @@ void Replicator::_close_reader() {
 ReplicatorGroupOptions::ReplicatorGroupOptions()
     : heartbeat_timeout_ms(-1)
     , election_timeout_ms(-1)
+    , connect_timeout_ms(-1)
     , log_manager(NULL)
     , ballot_box(NULL)
     , node(NULL)
@@ -1332,9 +1334,11 @@ ReplicatorGroupOptions::ReplicatorGroupOptions()
 ReplicatorGroup::ReplicatorGroup() 
     : _dynamic_timeout_ms(-1)
     , _election_timeout_ms(-1)
+    , _connect_timeout_ms(-1)
 {
     _common_options.dynamic_heartbeat_timeout_ms = &_dynamic_timeout_ms;
     _common_options.election_timeout_ms = &_election_timeout_ms;
+    _common_options.connect_timeout_ms = &_connect_timeout_ms;
 }
 
 ReplicatorGroup::~ReplicatorGroup() {
@@ -1344,6 +1348,7 @@ ReplicatorGroup::~ReplicatorGroup() {
 int ReplicatorGroup::init(const NodeId& node_id, const ReplicatorGroupOptions& options) {
     _dynamic_timeout_ms = options.heartbeat_timeout_ms;
     _election_timeout_ms = options.election_timeout_ms;
+    _connect_timeout_ms = options.connect_timeout_ms;
     _common_options.log_manager = options.log_manager;
     _common_options.ballot_box = options.ballot_box;
     _common_options.node = options.node;

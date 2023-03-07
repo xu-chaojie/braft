@@ -1363,8 +1363,7 @@ struct OnPreVoteRPCDone : public google::protobuf::Closure {
             if (cntl.ErrorCode() != 0) {
                 LOG(WARNING) << "node " << node->node_id()
                              << " request PreVote from " << peer
-                             << " error: " << cntl.ErrorText()
-                             << " local address: " << cntl.local_side();
+                             << " error: " << cntl.ErrorText();
                 break;
             }
             node->handle_pre_vote_response(peer, term, response);
@@ -1418,6 +1417,7 @@ void NodeImpl::pre_vote(std::unique_lock<raft_mutex_t>* lck) {
         }
         brpc::ChannelOptions options;
         options.connection_type = brpc::CONNECTION_TYPE_SINGLE;
+        options.connect_timeout_ms = _options.connect_timeout_ms;
         options.max_retry = 0;
         brpc::Channel channel;
         if (0 != init_channel(&channel, iter->addr, &options)) {
@@ -1500,6 +1500,7 @@ void NodeImpl::elect_self(std::unique_lock<raft_mutex_t>* lck) {
         }
         brpc::ChannelOptions options;
         options.connection_type = brpc::CONNECTION_TYPE_SINGLE;
+        options.connect_timeout_ms = _options.connect_timeout_ms;
         options.max_retry = 0;
         brpc::Channel channel;
         if (0 != init_channel(&channel, iter->addr, &options)) {
