@@ -776,13 +776,33 @@ bool LogManager::check_and_set_configuration(ConfigurationEntry* current) {
     return false;
 }
 
+DEFINE_int32(raft_max_logs_keep_in_memory, 10000,
+    "max logs keep in memory, -1 for unlimited");
+const int32_t kKeepLogsUnlimited = -1;
+
 void LogManager::set_disk_id(const LogId& disk_id) {
     std::unique_lock<raft_mutex_t> lck(_mutex);  // Race with set_applied_id
     if (disk_id < _disk_id) {
         return;
     }
     _disk_id = disk_id;
-    LogId clear_id = std::min(_disk_id, _applied_id);
+    LogId clear_id = _disk_id;
+    if (kKeepLogsUnlimited == FLAGS_raft_max_logs_keep_in_memory) {
+        clear_id = std::min(_disk_id, _applied_id);
+    } else {
+        if (_disk_id <= _applied_id) {
+            clear_id = _disk_id;
+        } else  {
+            LogId keepDiskId = _disk_id;
+            if (_disk_id.index > FLAGS_raft_max_logs_keep_in_memory) {
+                keepDiskId.index =
+                    _disk_id.index - FLAGS_raft_max_logs_keep_in_memory;
+            } else {
+                keepDiskId.index = 0;
+            }
+            clear_id = std::max(keepDiskId, _applied_id);
+        }
+    }
     lck.unlock();
     return clear_memory_logs(clear_id);
 }
