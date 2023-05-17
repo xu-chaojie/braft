@@ -31,7 +31,7 @@
 
 namespace braft {
 
-DEFINE_int32(raft_max_entries_size, 1024,
+DEFINE_int32(raft_max_entries_size, 2,
              "The max number of entries in AppendEntriesRequest");
 BRPC_VALIDATE_GFLAG(raft_max_entries_size, ::brpc::PositiveInteger);
 
